@@ -117,12 +117,13 @@ def main(data_file):
 
 	if st.button('Save my movie selection'):
 		selected_data = data.iloc[st.session_state.selected_movies, :]
-		selected_data.iloc[st.session_state.selected_movies, :].to_csv(
+		selected_data.to_csv(
 			'selected_movies.txt', index=False)
 		create_ics_file(
 			"program.ics",
-			st.session_state['selected_data'],
+			selected_data,
 		)
+		print(selected_data)
 		st.success(
 			"Movies saved successfully in selected_movies.txt and program.ics")
 
