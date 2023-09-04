@@ -4,6 +4,7 @@ from streamlit_calendar import calendar
 from icalendar import Calendar, Event
 from datetime import timedelta
 import os
+from milvus_db_utils.search import search
 
 
 # TODO : add an area to write the name of the festival
@@ -22,12 +23,19 @@ def load_data(filename):
 	return data
 
 
-def filter_data(data, search_term, show_selected):
+def filter_data(data,
+                title_search_term,
+                description_search_term,
+                show_selected):
 	if show_selected:
 		return data.iloc[st.session_state.selected_movies, :]
+	elif title_search_term != '':
+		return data[data['Title'].str.contains(title_search_term, case=False)
+		            | data['Description'].str.contains(title_search_term,
+		                                               case=False)]
 	else:
-		return data[data['Title'].str.contains(search_term, case=False) | data[
-			'Description'].str.contains(search_term, case=False)]
+		results = search(description_search_term)
+		return data.iloc[[result[0] for result in results], :]
 
 
 def show_selection(data):
@@ -108,12 +116,27 @@ def create_ics_file(file_name, selected_data):
 		f.write(cal.to_ical())
 
 
-###
+def plus_1(**kwargs):
+	print(kwargs["x"] + 1)
+	return kwargs["x"] + 1
+
+
 def main(data_file):
 	data = load_data(os.path.join("data", data_file))
 
 	if 'selected_movies' not in st.session_state:
 		st.session_state['selected_movies'] = []
+
+	col_search_a, col_search_b = st.columns([1, 1])
+	with col_search_a:
+		title_search_term = st.text_input(
+			"Search for a movie using terms in title", value='',
+			key="title_search_term")
+	with col_search_b:
+		description_search = st.text_input(
+			"Search for a movie using natural description", value='',
+			key="description_search")
+	show_selected = st.checkbox("Show Selected Only")
 
 	if st.button('Save my movie selection'):
 		selected_data = data.iloc[st.session_state.selected_movies, :]
@@ -127,12 +150,12 @@ def main(data_file):
 		st.success(
 			"Movies saved successfully in selected_movies.txt and program.ics")
 
-	search_term = st.text_input("Search for a movie")
-	show_selected = st.checkbox("Show Selected Only")
-
 	colA, colB = st.columns([4, 7])
 	with colA:
-		filtered_data = filter_data(data, search_term, show_selected)
+		filtered_data = filter_data(data,
+		                            title_search_term,
+		                            description_search,
+		                            show_selected)
 		selected_data = data.iloc[st.session_state.selected_movies, :]
 		selected_data.to_csv("test.csv")
 		show_selection(filtered_data)
@@ -163,13 +186,13 @@ if __name__ == "__main__":
 
 	st.markdown(css, unsafe_allow_html=True)
 
+	if 'data_downloaded' not in st.session_state:
+		st.session_state['data_downloaded'] = False
+
 	data_source = st.selectbox(
 		"Choose your data source:",
 		os.listdir("data")
 	)
-
-	if 'data_downloaded' not in st.session_state:
-		st.session_state['data_downloaded'] = False
 
 	if st.button("Confirm selection"):
 		st.session_state['data_downloaded'] = True
