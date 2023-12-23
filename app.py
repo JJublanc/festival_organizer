@@ -9,26 +9,61 @@ import os
 from milvus_db_utils.search import search
 from config import index_params
 
-# TODO : add an area to write the name of the festival
-# TODO : add a button to download icalendar and program.txt
-# TODO : add a menu to select the data source (name of the csv used)
-# TODO : add a button to launch the scrapping of the data source
-# TODO : add an area to choose the year of the festival
-# TODO : add a button to clear selection
-# TODO : add a button to clear search
+
+def main(data_file: str):
+	data = load_data(os.path.join("data", data_file))
+
+	if 'selected_movies' not in st.session_state:
+		st.session_state['selected_movies'] = []
+
+	col_search_a, col_search_b = st.columns([1, 1])
+	with col_search_a:
+		title_search_term = st.text_input(
+			"Search for a movie using terms in title", value='',
+			key="title_search_term")
+	with col_search_b:
+		description_search = st.text_input(
+			"Search for a movie using natural description", value='',
+			key="description_search")
+	show_selected = st.checkbox("Show Selected Only")
+
+	if st.button('Save my movie selection'):
+		selected_data = data.iloc[st.session_state.selected_movies, :]
+		selected_data.to_csv(
+			'selected_movies.txt', index=False)
+		create_ics_file(
+			"program.ics",
+			selected_data,
+		)
+		st.success(
+			"Movies saved successfully in selected_movies.txt and program.ics")
+
+	col_a, col_b = st.columns([4, 7])
+	with col_a:
+		filtered_data = filter_data(data,
+		                            title_search_term,
+		                            description_search,
+		                            show_selected)
+		selected_data = data.iloc[st.session_state.selected_movies, :]
+		selected_data.to_csv("test.csv")
+		show_selection(filtered_data)
+	with col_b:
+		show_calendar(data.iloc[st.session_state.selected_movies, :],
+		              data["Start"].min())
+
 
 @st.cache_data
-def load_data(filename):
+def load_data(filename: str) -> pd.DataFrame:
 	data = pd.read_csv(filename)
 	data['StartDatetime'] = pd.to_datetime(data['StartDatetime'])
 	data['EndDatetime'] = pd.to_datetime(data['EndDatetime'])
 	return data
 
 
-def filter_data(data,
-                title_search_term,
-                description_search_term,
-                show_selected):
+def filter_data(data: pd.DataFrame,
+                title_search_term: str,
+                description_search_term: str,
+                show_selected: bool) -> pd.DataFrame:
 	if show_selected:
 		return data.iloc[st.session_state.selected_movies, :]
 	elif title_search_term != '':
@@ -36,8 +71,9 @@ def filter_data(data,
 		            | data['Description'].str.contains(title_search_term,
 		                                               case=False)]
 	else:
-		index_param=index_params[0]
-		collection_name = f'embedded_field_{index_param["index_type"]}_{index_param["metric_type"]}'
+		index_param = index_params[0]
+		collection_name = f'embedded_field_{index_param["index_type"]}_' \
+		                  f'{index_param["metric_type"]}'
 		collection = Collection(name=collection_name)
 		collection.load()
 		print(index_param)
@@ -47,9 +83,10 @@ def filter_data(data,
 		return data.iloc[[result[0] for result in results], :]
 
 
-def show_selection(data):
+def show_selection(data: pd.DataFrame) -> None:
 	for index, row in data.iterrows():
-		is_selected = st.session_state.selected_movies is not None and index in st.session_state.selected_movies
+		is_selected = st.session_state.selected_movies is not None and index \
+		              in st.session_state.selected_movies
 		col1, col2 = st.columns([1, 2])
 		col1.image(row['ImageURL'], use_column_width=True)
 		col2.write(f'**{row["Title"]}**')
@@ -65,17 +102,19 @@ def show_selection(data):
 				st.session_state.selected_movies.remove(index)
 
 
-def test_delay(x):
-	try:
+def test_delay(x: pd.Timedelta) -> str:
+	if x is None:
+		return 'green'
+	else:
 		if x < pd.Timedelta(0):
 			return 'red'
 		else:
 			return 'green'
-	except:
-		return 'green'
 
 
-def show_calendar(filtered_data, initial_date):
+def show_calendar(filtered_data: pd.DataFrame,
+                  initial_date: str
+                  ) -> pd.DataFrame:
 	data = filtered_data.copy()
 	data = data.sort_values(by=['StartDatetime'])
 	data.to_csv("test.csv", index=False)
@@ -102,7 +141,8 @@ def show_calendar(filtered_data, initial_date):
 	return data
 
 
-def create_ics_file(file_name, selected_data):
+def create_ics_file(file_name: str,
+                    selected_data: pd.DataFrame) -> None:
 	events = []
 	cal = Calendar()
 	for _, row in selected_data.iterrows():
@@ -123,54 +163,6 @@ def create_ics_file(file_name, selected_data):
 
 	with open(file_name, 'wb') as f:
 		f.write(cal.to_ical())
-
-
-def plus_1(**kwargs):
-	print(kwargs["x"] + 1)
-	return kwargs["x"] + 1
-
-
-def main(data_file):
-	data = load_data(os.path.join("data", data_file))
-
-	if 'selected_movies' not in st.session_state:
-		st.session_state['selected_movies'] = []
-
-	col_search_a, col_search_b = st.columns([1, 1])
-	with col_search_a:
-		title_search_term = st.text_input(
-			"Search for a movie using terms in title", value='',
-			key="title_search_term")
-	with col_search_b:
-		description_search = st.text_input(
-			"Search for a movie using natural description", value='',
-			key="description_search")
-	show_selected = st.checkbox("Show Selected Only")
-
-	if st.button('Save my movie selection'):
-		selected_data = data.iloc[st.session_state.selected_movies, :]
-		selected_data.to_csv(
-			'selected_movies.txt', index=False)
-		create_ics_file(
-			"program.ics",
-			selected_data,
-		)
-		print(selected_data)
-		st.success(
-			"Movies saved successfully in selected_movies.txt and program.ics")
-
-	colA, colB = st.columns([4, 7])
-	with colA:
-		filtered_data = filter_data(data,
-		                            title_search_term,
-		                            description_search,
-		                            show_selected)
-		selected_data = data.iloc[st.session_state.selected_movies, :]
-		selected_data.to_csv("test.csv")
-		show_selection(filtered_data)
-	with colB:
-		show_calendar(data.iloc[st.session_state.selected_movies, :],
-		              data["Start"].min())
 
 
 if __name__ == "__main__":
