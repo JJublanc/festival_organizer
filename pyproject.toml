@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "theatre"
+version = "0.1.0"
+description = ""
+authors = ["jjublanc <johan.jublanc@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9,!=3.9.7"
+pandas = "^2.1.4"
+streamlit = "^1.29.0"
+plotly = "^5.18.0"
+matplotlib = "^3.8.2"
+icalendar = "^5.0.11"
+google-auth = "^2.25.2"
+google-auth-oauthlib = "^1.2.0"
+google-auth-httplib2 = "^0.2.0"
+google-api-python-client = "^2.111.0"
+streamlit-calendar = "^1.1.0"
+pymilvus = "^2.3.4"
+openai = "^1.6.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
