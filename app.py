@@ -8,9 +8,6 @@ from datetime import timedelta
 import os
 from milvus_db_utils.search import search
 from config import index_params
-import dotenv
-
-dotenv.load_dotenv()
 
 # TODO : add an area to write the name of the festival
 # TODO : add a button to download icalendar and program.txt

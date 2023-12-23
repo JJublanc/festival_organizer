@@ -22,7 +22,6 @@ def get_embeddings(data, embedded_field):
 	for i in data.index:
 		try:
 			embeddings.append(embed(data[embedded_field][i]))
-		# time.sleep(3)
 		except openai.error.APIConnectionError:
 			time.sleep(60)
 			embeddings.append(embed(data[embedded_field][i]))
