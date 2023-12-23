@@ -10,12 +10,15 @@ from milvus_db_utils.search import search
 from config import index_params
 
 
-def main(data_file: str):
+def main(data_file: str) -> None:
 	data = load_data(os.path.join("data", data_file))
 
 	if 'selected_movies' not in st.session_state:
 		st.session_state['selected_movies'] = []
 
+	################
+	# Search block #
+	################
 	col_search_a, col_search_b = st.columns([1, 1])
 	with col_search_a:
 		title_search_term = st.text_input(
@@ -27,6 +30,9 @@ def main(data_file: str):
 			key="description_search")
 	show_selected = st.checkbox("Show Selected Only")
 
+	################
+	# Save block   #
+	################
 	if st.button('Save my movie selection'):
 		selected_data = data.iloc[st.session_state.selected_movies, :]
 		selected_data.to_csv(
@@ -38,6 +44,9 @@ def main(data_file: str):
 		st.success(
 			"Movies saved successfully in selected_movies.txt and program.ics")
 
+	#####################################
+	# Display movies and program block  #
+	#################@###################
 	col_a, col_b = st.columns([4, 7])
 	with col_a:
 		filtered_data = filter_data(data,
