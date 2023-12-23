@@ -1,3 +1,5 @@
+from pymilvus import connections, FieldSchema, CollectionSchema, DataType, \
+	Collection
 import streamlit as st
 import pandas as pd
 from streamlit_calendar import calendar
@@ -5,7 +7,10 @@ from icalendar import Calendar, Event
 from datetime import timedelta
 import os
 from milvus_db_utils.search import search
+from config import index_params
+import dotenv
 
+dotenv.load_dotenv()
 
 # TODO : add an area to write the name of the festival
 # TODO : add a button to download icalendar and program.txt
@@ -34,7 +39,14 @@ def filter_data(data,
 		            | data['Description'].str.contains(title_search_term,
 		                                               case=False)]
 	else:
-		results = search(description_search_term)
+		index_param=index_params[0]
+		collection_name = f'embedded_field_{index_param["index_type"]}_{index_param["metric_type"]}'
+		collection = Collection(name=collection_name)
+		collection.load()
+		print(index_param)
+		results = search(description_search_term,
+		                 index_param,
+		                 collection)
 		return data.iloc[[result[0] for result in results], :]
 
 
