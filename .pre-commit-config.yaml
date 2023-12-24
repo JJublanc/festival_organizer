@@ -23,7 +23,7 @@ repos:
         name: creat requirements.txt from poetry.lock
         language: system
         pass_filenames: false
-        entry: poetry export -f requirements.txt --without-hashes --output requirements.txt
+        entry: poetry export -f requirements.txt --without-hashes --output requirements.txt --without dev --without data
   - repo: local
     hooks:
       - id: requirements-txt-add
