@@ -1,6 +1,9 @@
 program.ics
 selected_movies.txt
+.python-version
 
+# DB files
+milvus_db_utils/volumes/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
