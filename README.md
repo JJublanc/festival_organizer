@@ -1,6 +1,10 @@
+# TODO
+add screenshots and a video
+add a description of how to index data in Milvus
+
 # My Movie Festival Application
-This application was built using Python and Streamlit, and it is designed to 
-help users easily select and organize movie events for their own personalized 
+This application was built using Python and Streamlit, and it is designed to
+help users easily select and organize movie events for their own personalized
 movie festival.
 
 ## Features
@@ -25,7 +29,7 @@ Run the Streamlit application: streamlit run app.py
 
 ## Create a virtual environment and install dependencies
 ```
-pyenv local 3.9.4 
+pyenv local 3.9.4
 poetry config virtualenvs.in-project true
 poetry install
 poetry shell # Activate the virtual environment
@@ -34,25 +38,24 @@ poetry shell # Activate the virtual environment
 ## Add a dependency
 ```
 poetry add <package_name>
-poetry add <package_name> --dev # For development dependencies like 
-                                # testing libraries
+poetry add <package_name> --group dev # For development dependencies like
+                                      # testing libraries
 ```
 
 ## Set you environment variables
 ```
-COLLECTION_NAME = <Collection name>
+ROOT_PATH = <path to the root of the project>
 DIMENSION = 1536  # Embeddings size
 COUNT = 100  # How many titles to embed and insert.
 MILVUS_HOST = 'localhost'  # Milvus server URI
 MILVUS_PORT = '19530' # Milvus server port
 OPENAI_ENGINE = <which_engine_to_use>
 OPENAI_API_KEY = <use your own Open AI API Key here>
-embedded_field = "Description_movie"
 ```
 
 ## Milvus database
 
-For a simple use, you can install Milvus Standalone following the instructions 
+For a simple use, you can install Milvus Standalone following the instructions
 below:
 * https://milvus.io/docs/install_standalone-docker.md
 
@@ -62,5 +65,18 @@ cd milvus_db_utils/
 docker compose up -d
 ```
 
+## Pre-commit
+```
+poetry add pre-commit --group dev
+pre-commit install
+```
+
+
 ## Contributing
 Contributions to this application are welcome. Please fork this repository and create a pull request if you have something you want to add or change.
+
+
+## Licenses
+This application use packages such as protobuf which is licence under the BSD 3-Clause License. Please refer to the LICENSE file for more information. https://opensource.org/license/bsd-3-clause/
+Other packages are under the Apache 2.0 License. Please refer to the LICENSE file for more information. https://opensource.org/licenses/Apache-2.0
+For more informatio about licence, please refer to the file licenses.md

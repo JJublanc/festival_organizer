@@ -1,0 +1,38 @@
+exclude: '^(venv/data)'
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        args:
+          - --profile
+          - black
+  - repo: https://github.com/psf/black
+    rev: 22.10.0
+    hooks:
+      - id: black
+  - repo: local
+    hooks:
+      - id: requirements-txt-creator
+        name: creat requirements.txt from poetry.lock
+        language: system
+        pass_filenames: false
+        entry: poetry export -f requirements.txt --without-hashes --output requirements.txt
+  - repo: local
+    hooks:
+      - id: requirements-txt-add
+        name: git add requirements.txt
+        language: system
+        pass_filenames: false
+        entry: git add requirements.txt
+  - repo: https://github.com/dhatim/python-license-check
+    rev: master
+    hooks:
+      - id: liccheck
+        language: system
