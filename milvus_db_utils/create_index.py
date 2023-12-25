@@ -177,6 +177,5 @@ def insert_each_title_and_its_embedding(
 
 
 if __name__ == "__main__":
-    # Get data
     args = get_args()
     main(args.filename, args.embeded_field)
