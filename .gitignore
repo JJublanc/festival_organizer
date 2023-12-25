@@ -2,6 +2,9 @@ program.ics
 selected_movies.txt
 .python-version
 
+# csv files
+data/
+
 # DB files
 milvus_db_utils/volumes/
 

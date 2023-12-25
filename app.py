@@ -13,7 +13,7 @@ from milvus_db_utils.search import search
 
 def main(data_file: str) -> None:
     data = load_data(os.path.join("data", data_file))
-
+    print(len(data))
     if "selected_movies" not in st.session_state:
         st.session_state["selected_movies"] = []
 
@@ -53,6 +53,7 @@ def main(data_file: str) -> None:
         filtered_data = filter_data(
             data, title_search_term, description_search, show_selected
         )
+        print(len(filtered_data))
         selected_data = data.iloc[st.session_state.selected_movies, :]
         selected_data.to_csv("test.csv")
         show_selection(filtered_data)
@@ -83,7 +84,7 @@ def filter_data(
             data["Title"].str.contains(title_search_term, case=False)
             | data["Description"].str.contains(title_search_term, case=False)
         ]
-    else:
+    elif description_search_term != "":
         index_param = index_params[0]
         collection_name = (
             f'embedded_field_{index_param["index_type"]}_'
@@ -91,9 +92,10 @@ def filter_data(
         )
         collection = Collection(name=collection_name)
         collection.load()
-        print(index_param)
         results = search(description_search_term, index_param, collection)
         return data.iloc[[result[0] for result in results], :]
+    else:
+        return data
 
 
 def show_selection(data: pd.DataFrame) -> None:
