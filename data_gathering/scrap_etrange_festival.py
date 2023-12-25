@@ -22,6 +22,10 @@ def main(year: int) -> None:
     times = []
     locations = []
     img_urls = []
+    descriptions = []
+    descriptions_extra = []
+    directors = []
+    movie_urls = []
 
     for n in range(6, 18):
         target_url = (
@@ -34,14 +38,26 @@ def main(year: int) -> None:
 
         for url in session_urls:
             logging.info(f"Getting info from {url}")
-            title, duration, seances, img_url = get_info_from_session_url(url)
-            for date, info in seances.items():
+            (
+                title,
+                duration,
+                session_practical_info,
+                img_url,
+                description,
+                description_extra,
+                director,
+            ) = get_info_from_session_url(url)
+            for date, info in session_practical_info.items():
                 titles.append(title)
                 durations.append(duration)
                 dates.append(date)
                 times.append(info["time"])
                 locations.append(info["location"])
                 img_urls.append(img_url)
+                descriptions.append(description)
+                descriptions_extra.append(description_extra)
+                directors.append(director)
+                movie_urls.append(url)
 
     data_dict = {
         "Title": titles,
@@ -50,6 +66,10 @@ def main(year: int) -> None:
         "Time": times,
         "Location": locations,
         "ImageURL": img_urls,
+        "Description_movie": descriptions,
+        "Description_extra": descriptions_extra,
+        "Director": directors,
+        "URL": movie_urls,
     }
 
     # Create a pandas DataFrame from the dictionary
@@ -61,7 +81,7 @@ def main(year: int) -> None:
 
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Scrap the Etrange Festival " "website to get the schedule"
+        description="Scrap the Etrange Festival website to get the schedule"
     )
     parser.add_argument(
         "-y",
@@ -95,47 +115,62 @@ def get_urls_from_div(url: str, div_class: str) -> list:
     return urls
 
 
-def get_info_from_session_url(url: str) -> Tuple[str, int, dict, str]:
+def get_info_from_session_url(url: str) -> Tuple[str, int, dict, str, str, str, str]:
     response = requests.get(url)
     response.raise_for_status()
 
     soup = BeautifulSoup(response.content, "html.parser")
-    title = ""
-    duration = 0
-    absolute_image_url = ""
 
-    #############
-    # Get title #
-    #############
+    title = get_title(soup)
+    duration = get_duration(soup)
+    absolute_image_url = get_absolute_image_url(soup, url)
+    session_practical_info = get_session_practical_info(soup)
+    description, description_extra = get_descriptions(soup)
+    director = get_director(soup)
+    return (
+        title,
+        duration,
+        session_practical_info,
+        absolute_image_url,
+        description,
+        description_extra,
+        director,
+    )
+
+
+def get_title(soup: BeautifulSoup) -> str:
     title_element = soup.find("h2", class_="content_details_title")
     if title_element:
         title = title_element.get_text().strip()
+    else:
+        title = ""
+    return title
 
-    #############
-    # DURATION #
-    ############
+
+def get_duration(soup: BeautifulSoup) -> int:
+    duration = 0
     ul_elements = soup.find_all("ul", class_="list-unstyled details_movie_basic")
     for ul_element in ul_elements:
         duration_elements = ul_element.find_all("li")
         if duration_elements:
             for duration_element in duration_elements:
                 duration += convert_duration_to_minutes(duration_element.text)
+    return duration
 
-    #########
-    # IMAGE #
-    #########
 
+def get_absolute_image_url(soup: BeautifulSoup, url: str) -> str:
+    absolute_image_url = ""
     img_element = soup.find("div", class_="details_main_picture").find("img")
     if img_element:
         image_url = img_element.get("src")
         if image_url:
             # Convert the relative URL to absolute URL
             absolute_image_url = get_absolute_url(url, image_url)
+    return absolute_image_url
 
-    ########################
-    # DATE, TIME, LOCATION #
-    ########################
-    seances = {}
+
+def get_session_practical_info(soup: BeautifulSoup) -> dict:
+    session = {}
     details_elements = soup.find_all("p")
     for details_element in details_elements:
         # Get the text of the paragraph
@@ -143,9 +178,51 @@ def get_info_from_session_url(url: str) -> Tuple[str, int, dict, str]:
         # Extract date, time, and location from the paragraph text
         date, time, location = extract_date_time_location(paragraph_text)
         if date:
-            seances[date] = {"time": time, "location": location}
+            session[date] = {"time": time, "location": location}
+    return session
 
-    return title, duration, seances, absolute_image_url
+
+def get_descriptions(soup: BeautifulSoup) -> Tuple[str, str]:
+    description = ""
+    descriptions = soup.find_all("div", class_="movie_details_description")
+    if descriptions:
+        description = ". ".join(
+            [description.get_text() for description in descriptions]
+        ).strip()
+    else:
+        descriptions = soup.find_all("div", class_="program_details_description")
+        if descriptions:
+            description = ". ".join(
+                [description.get_text() for description in descriptions]
+            ).strip()
+
+    description_extra = ""
+    descriptions_extra = soup.find_all("div", class_="movie_details_extra")
+    if descriptions_extra:
+        description_extra = ". ".join(
+            [description.get_text() for description in descriptions_extra]
+        ).strip()
+    else:
+        descriptions_extra = soup.find_all("div", class_="program_details_extra")
+        if descriptions_extra:
+            description_extra = ". ".join(
+                [description.get_text() for description in descriptions_extra]
+            ).strip()
+    return description, description_extra
+
+
+def get_director(soup: BeautifulSoup) -> str:
+    director = ""
+    directors = soup.find_all("div", class_="director_detail")
+    if directors:
+        director = ". ".join([director.get_text() for director in directors]).strip()
+    else:
+        directors = soup.find_all("h4", class_="director_detail")
+        if directors:
+            director = ". ".join(
+                [director.get_text() for director in directors]
+            ).strip()
+    return director
 
 
 def convert_duration_to_minutes(duration_text):
@@ -212,6 +289,9 @@ def preprocess_data(data):
         + " - "
         + data["Duration"].astype(str)
         + " min"
+    )
+    data["Description_movie_full"] = (
+        data["Description_movie"] + " - " + data["Description_extra"]
     )
     current_year = datetime.now().year
     data["StartDatetime"] = pd.to_datetime(
