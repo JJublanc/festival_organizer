@@ -1,6 +1,6 @@
-# TODO
-add screenshots and a video
-add a description of how to index data in Milvus
+https://github.com/JJublanc/festival_organizer/assets/45565888/7acb8d61-4491-4b55-96c6-9c63570d5d74
+
+ndex data in Milvus
 
 # My Movie Festival Application
 This application was built using Python and Streamlit, and it is designed to
