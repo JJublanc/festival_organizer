@@ -36,6 +36,13 @@ repos:
         language: system
         pass_filenames: false
         entry: git add requirements.txt
+  - repo: local
+    hooks:
+      - id: pytest-check
+        name: pytest-check
+        language: system
+        pass_filenames: false
+        entry: "pytest tests/u_tests_scrap_etrange_festival.py"
   - repo: https://github.com/dhatim/python-license-check
     rev: master
     hooks:
