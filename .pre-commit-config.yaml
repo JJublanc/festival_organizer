@@ -23,11 +23,11 @@ repos:
         name: create requirements.txt from poetry.lock
         language: system
         pass_filenames: false
-        entry: poetry export -f requirements.txt --without-hashes --output requirements.txt --without dev --without data
+        entry: poetry export -f requirements.txt --without-hashes --output requirements.txt --only dev --without data
   - repo: local
     hooks:
       - id: requirements-txt-add
-        name: git add requirements.txt
+        name: git add requirements/requirements.txt
         language: system
         pass_filenames: false
         entry: git add requirements.txt
