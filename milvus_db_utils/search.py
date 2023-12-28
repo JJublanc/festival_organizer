@@ -3,10 +3,9 @@ import time
 
 import dotenv
 import pandas as pd
-from pymilvus import Collection, CollectionSchema, DataType, FieldSchema, connections
-
 from config import embedded_field, index_params
 from milvus_db_utils.utils import embed
+from pymilvus import Collection, CollectionSchema, DataType, FieldSchema, connections
 
 index_names = [
     f'embedded_field_{index_param["index_type"]}_{index_param["metric_type"]}'

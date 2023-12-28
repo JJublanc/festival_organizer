@@ -6,6 +6,8 @@ import time
 import dotenv
 import openai
 import pandas as pd
+from config import DATA_PATH, index_params
+from milvus_db_utils.utils import embed
 from pymilvus import (
     Collection,
     CollectionSchema,
@@ -14,9 +16,6 @@ from pymilvus import (
     connections,
     utility,
 )
-
-from config import DATA_PATH, index_params
-from milvus_db_utils.utils import embed
 
 # Load environment variables
 dotenv.load_dotenv()

@@ -3,12 +3,11 @@ from datetime import timedelta
 
 import pandas as pd
 import streamlit as st
+from config import index_params
 from icalendar import Calendar, Event
+from milvus_db_utils.search import search
 from pymilvus import Collection, CollectionSchema, DataType, FieldSchema, connections
 from streamlit_calendar import calendar
-
-from config import index_params
-from milvus_db_utils.search import search
 
 
 def main(data_file: str) -> None:
