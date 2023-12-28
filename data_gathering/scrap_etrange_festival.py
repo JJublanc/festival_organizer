@@ -9,7 +9,6 @@ from urllib.parse import urljoin
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-
 from config import DATA_PATH
 
 logging.basicConfig(level=logging.INFO)
