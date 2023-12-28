@@ -73,7 +73,6 @@ coverage.xml
 # Environment Variables / Configuration
 .env
 .env*
-config.py
 
 # SQLite Database Files
 *.sqlite3
