@@ -224,10 +224,12 @@ def get_director(soup: BeautifulSoup) -> str:
     return director
 
 
-def convert_duration_to_minutes(duration_text):
+def convert_duration_to_minutes(duration_text: str) -> int:
+    duration_text = duration_text.lower()
+
     # Define regular expressions for matching hours and minutes
     hour_regex = r"(\d+)h"
-    minute_regex = r"(\d+)mn|\d+m"
+    minute_regex = r"(\d+)m"
 
     # Initialize variables for hours and minutes
     hours = 0
@@ -249,7 +251,7 @@ def convert_duration_to_minutes(duration_text):
     return total_minutes
 
 
-def extract_date_time_location(text):
+def extract_date_time_location(text: str) -> Tuple[str, str, str]:
     # Define regular expressions for matching date, time, and location
     date_regex = r"(\d{2}/\d{2})"
     time_regex = r"(\d{2}h\d{2})"
@@ -278,7 +280,7 @@ def extract_date_time_location(text):
     return date, time, location
 
 
-def preprocess_data(data):
+def preprocess_data(data: pd.DataFrame) -> pd.DataFrame:
     data["Description"] = (
         data["Date"]
         + " - "
